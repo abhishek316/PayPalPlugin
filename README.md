@@ -1,3 +1,5 @@
+#This project is unmaintained, I have no interest in updating it - if you would like to take over, let me know#
+
 Project examples located in PayPalPlugin/.EXAMPLES  (hidden to minimize confusion when adding to xcode)
 
 # PhoneGap PayPal-Plugin #
