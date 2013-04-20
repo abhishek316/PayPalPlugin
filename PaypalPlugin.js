@@ -1,6 +1,7 @@
 // //////////////////////////////////////
 // Paypal Cordova Plugin
-// by Shazron Abdullah
+// Created by: Shazron Abdullah
+// Maintained by: Scott Robinson
 //
 // Oct 8th 2010
 //     Initial implementation
@@ -17,7 +18,7 @@ var PayPal = (function() {
 /*
  * buttonType (unused currently)
  */
-SAiOSPaypalPlugin.ButtonType = {
+PaypalPlugin.ButtonType = {
 	'BUTTON_68x24' : 0,
 	'BUTTON_68x33' : 1,
 	'BUTTON_118x24': 2,
@@ -31,7 +32,7 @@ SAiOSPaypalPlugin.ButtonType = {
 /*
  * PaymentType for window.plugins.prepare
  */
-SAiOSPaypalPlugin.PaymentType = 
+PaypalPlugin.PaymentType = 
 {
 	'HARD_GOODS': 0,
 	'SERVICE'	: 1,
@@ -42,7 +43,7 @@ SAiOSPaypalPlugin.PaymentType =
 /*
  * errorType for PaypalPaymentEvent.Failed
  */
-SAiOSPaypalPlugin.FailureType  = 
+PaypalPlugin.FailureType  = 
 {
 	'SYSTEM_ERROR' 		: 0,
 	'RECIPIENT_ERROR'	: 1,
@@ -53,7 +54,7 @@ SAiOSPaypalPlugin.FailureType  =
 /*
  * Events to listen to after a user touches the payment button 
  */
-SAiOSPaypalPlugin.PaymentEvent =
+PaypalPlugin.PaymentEvent =
 {
 	/**
 	 * Listen for this event to signify Paypal payment success. The event object will have these properties:
@@ -78,7 +79,7 @@ var cordovaRef = window.PhoneGap || window.Cordova || window.cordova; // old to 
 /**
  * Constructor
  */
-function SAiOSPaypalPlugin()
+function PaypalPlugin()
 {
 }
 
@@ -86,17 +87,17 @@ function SAiOSPaypalPlugin()
  * Prepare payment type
  *     paymentType is from the PayPalPaymentType enum
  */
-SAiOSPaypalPlugin.prototype.prepare = function(paymentType)
+PaypalPlugin.prototype.prepare = function(paymentType)
 {
-	cordovaRef.exec("SAiOSPaypalPlugin.prepare", paymentType);
+	cordovaRef.exec("PaypalPlugin.prepare", paymentType);
 }
 
 /**
  * Initiate payment
  */
-SAiOSPaypalPlugin.prototype.pay = function()
+PaypalPlugin.prototype.pay = function()
 {
-	cordovaRef.exec("SAiOSPaypalPlugin.pay");
+	cordovaRef.exec("PaypalPlugin.pay");
 }
 
 /**
@@ -108,21 +109,21 @@ SAiOSPaypalPlugin.prototype.pay = function()
  *      recipient - a string value (e-mail address, required)
  *      merchantName - a string value (required)
  */
-SAiOSPaypalPlugin.prototype.setPaymentInfo = function(paymentProperties)
+PaypalPlugin.prototype.setPaymentInfo = function(paymentProperties)
 {
-	cordovaRef.exec("SAiOSPaypalPlugin.setPaymentInfo", paymentProperties);
+	cordovaRef.exec("PaypalPlugin.setPaymentInfo", paymentProperties);
 }
 
 /**
  * Install function
  */
-SAiOSPaypalPlugin.install = function()
+PaypalPlugin.install = function()
 {
 	if ( !window.plugins ) {
 		window.plugins = {};
 	} 
 	if ( !window.plugins.paypal ) {
-		window.plugins.paypal = new SAiOSPaypalPlugin();
+		window.plugins.paypal = new PaypalPlugin();
 	}
 }
 
@@ -130,7 +131,7 @@ SAiOSPaypalPlugin.install = function()
  * Add to Cordova constructor
  */
 if (cordovaRef && cordovaRef.addConstructor) {
-	cordovaRef.addConstructor(SAiOSPaypalPlugin.install);
+	cordovaRef.addConstructor(PaypalPlugin.install);
 } else {
 	console.log("PayPal Cordova Plugin could not be installed.");
 	return null;
@@ -141,10 +142,10 @@ if (cordovaRef && cordovaRef.addConstructor) {
  */
 
 return {
-	ButtonType  : SAiOSPaypalPlugin.ButtonType,
-	PaymentType : SAiOSPaypalPlugin.PaymentType,
-	FailureType : SAiOSPaypalPlugin.FailureType,
-	PaymentEvent: SAiOSPaypalPlugin.PaymentEvent
+	ButtonType  : PaypalPlugin.ButtonType,
+	PaymentType : PaypalPlugin.PaymentType,
+	FailureType : PaypalPlugin.FailureType,
+	PaymentEvent: PaypalPlugin.PaymentEvent
 };
 
 // /////////////////////////
