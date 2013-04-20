@@ -38,8 +38,7 @@ Using this plugin requires [Cordova](http://github.com/apache/incubator-cordova-
 
 Patches welcome! Send a pull request. Since this is not a part of Cordova Core (which requires an Apache iCLA), this should be easier.
 
-Post issues in the [PhoneGap Google Groups](http://groups.google.com/group/phonegap), include in the subject heading - "PayPalPlugin" or on [Github](http://github.com/phonegap/phonegap-plugins/issues)
-(preferred)
+Post issues using the issue tab above. Thank you for your support.
 
 ## LICENSE ##
 
