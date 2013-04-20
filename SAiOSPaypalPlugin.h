@@ -1,8 +1,9 @@
 //
-//  SAiOSPaypalPlugin.h
+//  PaypalPlugin.h
 //  Paypal Plugin for PhoneGap
 //
 //  Created by shazron on 10-10-08.
+//  Maintained by Scott Robinson 04-28-2013.
 //  Copyright 2010 Shazron Abdullah. All rights reserved.
 
 #import <Foundation/Foundation.h>
@@ -27,7 +28,7 @@
 @end
 
 
-@interface SAiOSPaypalPlugin : CDVPlugin<PayPalMEPDelegate> {
+@interface PaypalPlugin : CDVPlugin<PayPalMEPDelegate> {
 	UIButton* paypalButton;
 	PaypalPaymentInfo* paymentInfo;
 }
