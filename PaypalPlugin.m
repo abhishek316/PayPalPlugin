@@ -1,11 +1,12 @@
 //
-//  SAiOSPaypalPlugin.m
+//  PaypalPlugin.m
 //  Paypal Plugin for PhoneGap
 //
 //  Created by shazron on 10-10-08.
+//  Maintained by Scott Robinon .
 //  Copyright 2010 Shazron Abdullah. All rights reserved.
 
-#import "SAiOSPaypalPlugin.h"
+#import "PaypalPlugin.h"
 #import "PayPal.h"
 #import "PayPalMEPPayment.h"
 #import "MEPAddress.h" // use for dynamic amount calculation
@@ -28,7 +29,7 @@
 
 @end
 
-@implementation SAiOSPaypalPlugin
+@implementation PaypalPlugin
 
 @synthesize paypalButton, paymentInfo;
 
@@ -43,7 +44,7 @@
 
 -(CDVPlugin*) initWithWebView:(UIWebView*)theWebView
 {
-    self = (SAiOSPaypalPlugin*)[super initWithWebView:(UIWebView*)theWebView];
+    self = (PaypalPlugin*)[super initWithWebView:(UIWebView*)theWebView];
     if (self) {
 		if ([PAYPAL_APP_ID isEqualToString:NO_APP_ID]) {
 			NSLog(@"WARNING: You are using a dummy PayPal App ID.");
@@ -66,7 +67,7 @@
 	
 	int argc = [arguments count];
 	if (argc < 1) {
-		NSLog(@"SAiOSPaypalPlugin.prepare - missing first argument for paymentType (integer).");
+		NSLog(@"PaypalPlugin.prepare - missing first argument for paymentType (integer).");
 		return;
 	}
 	
@@ -83,7 +84,7 @@
 	[super.webView addSubview:self.paypalButton];
 	self.paypalButton.hidden = YES;
 
-	NSLog(@"SAiOSPaypalPlugin.prepare - set paymentType: %d", paymentType);
+	NSLog(@"PaypalPlugin.prepare - set paymentType: %d", paymentType);
 }
 
 
@@ -92,7 +93,7 @@
 	if (self.paypalButton != nil) {
 		[self.paypalButton sendActionsForControlEvents:UIControlEventTouchUpInside];
 	} else {
-		NSLog(@"SAiOSPaypalPlugin.pay - payment not initialized. Call SAiOSPaypalPlugin.prepare(paymentType)");
+		NSLog(@"PaypalPlugin.pay - payment not initialized. Call PaypalPlugin.prepare(paymentType)");
 	}
 }
 
@@ -120,13 +121,13 @@
 		[pp Checkout:payment];
 		[payment release];
 
-		NSLog(@"SAiOSPaypalPlugin.payWithPaypal - payment sent. currency:%@ amount:%@ desc:%@ recipient:%@ merchantName:%@",
+		NSLog(@"PaypalPlugin.payWithPaypal - payment sent. currency:%@ amount:%@ desc:%@ recipient:%@ merchantName:%@",
 			  self.paymentInfo.paymentCurrency, self.paymentInfo.paymentAmount, self.paymentInfo.itemDesc,
 			  self.paymentInfo.recipient, self.paymentInfo.merchantName);
 	}
 	else
 	{
-		NSLog(@"SAiOSPaypalPlugin.payWithPaypal - no payment info. Set it using SAiOSPaypalPlugin.setPaymentInfo");
+		NSLog(@"PaypalPlugin.payWithPaypal - no payment info. Set it using PaypalPlugin.setPaymentInfo");
 	}
 }
 
@@ -145,7 +146,7 @@
 	
 	[super writeJavascript:[NSString stringWithFormat:jsString, transactionID]];
 	
-	NSLog(@"SAiOSPaypalPlugin.paymentSuccess - transactionId:%@", transactionID);
+	NSLog(@"PaypalPlugin.paymentSuccess - transactionId:%@", transactionID);
 }
 
 - (void) paymentCanceled 
@@ -172,7 +173,7 @@
 	
 	[super writeJavascript:[NSString stringWithFormat:jsString, errorType]];	
 
-	NSLog(@"SAiOSPaypalPlugin.paymentFailed - errorType:%d", errorType);
+	NSLog(@"PaypalPlugin.paymentFailed - errorType:%d", errorType);
 }
 
 @end
