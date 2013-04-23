@@ -1,7 +1,7 @@
 // //////////////////////////////////////
 // Paypal Cordova Plugin
-// Created by: Shazron Abdullah
-// Maintained by: Scott Robinson
+// Orginally by: Shazron Abdullah
+// Updated by: Scott Robinson
 //
 // Oct 8th 2010
 //     Initial implementation
@@ -9,8 +9,9 @@
 //     Updated for Cordova 1.6.0, wrapped in function closure, constants are namespaced under the global PayPal object
 //     e.g if it was PayPalPaymentType.DONATION before, it's PayPal.PaymentType.Donation now
 //         and it is also accessible under window.plugins.paypal.PaymentType.Donation
-// 
-
+// Apr 23th 2013
+//     Updated for Cordova 2.6.0
+//
 // /////////////////////////
 var PayPal = (function() {
 // /////////////////////////
