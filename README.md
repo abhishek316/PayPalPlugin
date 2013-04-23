@@ -1,21 +1,25 @@
-Project examples located in PayPalPlugin/.EXAMPLES  (hidden to minimize confusion when adding to xcode)
-
 # PhoneGap PayPal-Plugin #
-Created by: Shazron Abdullah  
-Maintained by: Scott Robinson
+Originally by: Shazron Abdullah  
+Updated by: Scott Robinson
 
 ## Adding the Plugin to your project ##
 
+###iOS Instructions###
 Using this plugin requires [Cordova](http://github.com/apache/incubator-cordova-ios) and the PayPal Mobile Payments Library. The PayPal Mobile Payments Library can be downloaded [here](https://www.x.com/community/ppx/xspaces/mobile/mep).
 
-1. Make sure your Cordova Xcode project has been [updated for Cordova 1.6.0](https://github.com/apache/incubator-cordova-ios/blob/master/guides/Cordova%20Plugin%20Upgrade%20Guide.md)
+1. Make sure your Cordova Xcode project has been [updated for Cordova 2.6.0](https://github.com/apache/incubator-cordova-ios/blob/master/guides/Cordova%20Plugin%20Upgrade%20Guide.md)
 2. Add the "Paypal Mobile Payments" folder to your project (put in a suitable location under your project, then drag and drop it in)
 3. Add the .h and .m files to your Plugins folder in your project (as a Group "yellow folder" not a Reference "blue folder")
 4. Add the .js files to your "www" folder on disk, and add reference(s) to the .js files as &lt;script&gt; tags in your html file(s)
-5. In **Cordova.plist** (1.5.0 or greater) or **PhoneGap.plist** (1.4.1 or lesser), under the **Plugins** section, add an idential key and value of **"SAiOSPaypalPlugin"**
+5. In **Cordova.plist** (1.5.0 or greater) or **PhoneGap.plist** (1.4.1 or lesser), under the **Plugins** section, add an idential key and value of **"PaypalPlugin"**
 6. Make sure you check the **"RELEASE NOTES"** section below!
 
 ## RELEASE NOTES ##
+
+### 20130423 ###
+* Updated for Cordova 2.6.0 (backwards compatible to earlier versions as well)
+* Started plans to adapt this plugin for use with Android, Windows Phone, and Blackberry. Other platforms to follow.
+* Community contribution is welcome. Send a pull request to contribute.
 
 ### 20120409 ###
 - Changed license to Apache 2.0 License
@@ -42,7 +46,7 @@ Post issues using the issue tab above. Thank you for your support.
 
 ## LICENSE ##
 
-Copyright 2012 Shazron Abdullah
+Copyright 2010-2012 Shazron Abdullah and 2013 Scott Robinson
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
