@@ -2,9 +2,9 @@
 //  PaypalPlugin.m
 //  Paypal Plugin for PhoneGap
 //
-//  Created by shazron on 10-10-08.
-//  Maintained by Scott Robinon .
-//  Copyright 2010 Shazron Abdullah. All rights reserved.
+//  Originally by shazron on 10-10-08.
+//  Updated by Scott Robinson
+//  Copyright 2010-2012 Shazron Abdullah and 2013 Scott Robinson. All rights reserved.
 
 #import "PaypalPlugin.h"
 #import "PayPal.h"
