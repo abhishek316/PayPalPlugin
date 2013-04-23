@@ -17,14 +17,8 @@
     	<script type="text/javascript" charset="utf-8">
 
 
-	// If you want to prevent dragging, uncomment this section
-	/*
-	function preventBehavior(e) 
-	{ 
-      e.preventDefault(); 
-    };
-	document.addEventListener("touchmove", preventBehavior, false);
-	*/
+	// If you want to prevent dragging, uncomment the following line
+	//document.addEventListener("touchmove", function (e) {e.preventDefault();}, false);
 	
 	function onBodyLoad()
 	{
@@ -35,20 +29,19 @@
 	function onDeviceReady()
 	{
 		try {
+			// do your thing!
+			document.addEventListener(PayPal.PaymentEvent.Success, onPaymentSuccess,false);
+			document.addEventListener(PayPal.PaymentEvent.Canceled, onPaymentCanceled,false);
+			document.addEventListener(PayPal.PaymentEvent.Failed, onPaymentFailed,false);
 		
-		// do your thing!
-		document.addEventListener(PayPal.PaymentEvent.Success, onPaymentSuccess,false);
-		document.addEventListener(PayPal.PaymentEvent.Canceled, onPaymentCanceled,false);
-		document.addEventListener(PayPal.PaymentEvent.Failed, onPaymentFailed,false);
-		
-		window.plugins.paypal.prepare(PayPal.PaymentType.DONATION);
-		window.plugins.paypal.setPaymentInfo({
+			window.plugins.paypal.prepare(PayPal.PaymentType.DONATION);
+			window.plugins.paypal.setPaymentInfo({
 				paymentCurrency : "USD",
 				paymentAmount : "10.00",
 				itemDesc : "network cable",
 				//recipient : "name@example.com",
-                merchantName : "Cables R Us"
-		});
+                		merchantName : "Cables R Us"
+			});
 		
 		} catch (e) {
 			debug.error(e);
