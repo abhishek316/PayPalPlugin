@@ -14,11 +14,87 @@ Using this plugin requires [Cordova](http://github.com/apache/incubator-cordova-
 5. In **Cordova.plist** (1.5.0 or greater) or **PhoneGap.plist** (1.4.1 or lesser), under the **Plugins** section, add an idential key and value of **"PaypalPlugin"**
 6. Make sure you check the **"RELEASE NOTES"** section below!
 
+##Detailed Instructions##
+This plugin can be used in two ways:
+
+###&quot;Manual Mode&quot;:###
+
+   There are 3 functions that need to be called for a payment to be processed:
+
+      1. window.plugins.paypal.prepare(paymentType);
+         - This method takes an enum as an argument, the available options are:
+            *PayPal.PaymentType.HARD_GOODS
+            *PayPal.PaymentType.SERVICE
+            *PayPal.PaymentType.PERSONAL
+            *PayPal.PaymentType.DONATION
+
+      2. window.plugins.paypal.setPaymentInfo(paymentProperties);
+         - This method takes an object containing the following:
+            *paymentCurrency - a string value (required)
+            *paymentAmount - a double value (required)
+            *itemDesc - a string value (required)
+            *recipient - a string value of an email address (required)
+            *merchantName - a string value (required)
+
+      3. window.plugins.paypal.pay();
+
+   Example implementation:
+      
+      window.plugins.paypal.prepare(PayPal.PaymentType.HARD_GOODS);
+      window.plugins.paypal.setPaymentInfo({paymentCurrency: "USD",
+                                            paymentAmount: "10.00",
+                                            itemDesc: "iPhone 4S Case",
+                                            recipient: "support@somemakebelievecompany.com",
+                                            merchantName: "Make Believe Merchant"});
+      window.plugins.paypal.pay();
+
+###&quot;Auto Mode&quot;:###
+
+   Add the following code block to your javascript file: (an example is included, 'index.js')
+
+      function PayPalButtonClick(event) {
+          switch (event.target.getAttribute("data-paymentType")) {
+              case "Hard Goods":
+                  window.plugins.paypal.prepare(PayPal.PaymentType.HARD_GOODS);
+                  break;
+              case "Service":
+                  window.plugins.paypal.prepare(PayPal.PaymentType.SERVICE);
+                  break;
+              case "Personal":
+                  window.plugins.paypal.prepare(PayPal.PaymentType.PERSONAL);
+                  break;
+              case "Donation":
+                  window.plugins.paypal.prepare(PayPal.PaymentType.DONATION);
+                  break;
+          }
+          window.plugins.paypal.setPaymentInfo({paymentCurrency: event.target.getAttribute("data-currency"), paymentAmount: event.target.getAttribute("data-amount"), itemDesc: event.target.getAttribute("data-description"), recipient: event.target.getAttribute("data-recipient"), merchantName: event.target.getAttribute("data-merchant")});
+          window.plugins.paypal.pay();
+      }
+
+   This will allow you to have multiple buttons on your html pages that all have the ability to send different type of payments and item details. To use this simply add an element to your html page with a onclick event of 'PayPalButtonClick(event)'
+
+   Next add the following attributes to that element:
+
+      * data-paymentType - The type of payment to be sent (Options are: "Hard Goods", "Service", "Personal", or "Donation")
+      * data-currency - The currency for the payment (example: "USD")
+      * data-amount - The amount of the payment using the above currency (example: "10.00")
+      * data-description - A description of the item, service, personal payment, or donation.
+      * data-recipient - The email of the payment recipient
+      * data-merchant - The name of the merchant being paid
+
+   What this does is once the button is clicked, the above code block will call all of the &quot;Manual Mode&quot; functions for you setting their values to the values you set in the element's attributes.
+
+   Example implementation: 
+
+      <button data-currency="USD" data-amount="10.00" data-description="Network Cable" data-recipient="name@example.com" data-merchant="Cables-R-Us" data-paymentType="Donation" onclick="PayPalButtonClick(event)">PAY</button>
+      <button data-currency="USD" data-amount="10.00" data-description="IDE" data-recipient="name@example.com" data-merchant="JAVA" data-paymentType="Service" onclick="PayPalButtonClick(event)">PAY</button>
+
 ## RELEASE NOTES ##
 
-### 20130423 ###
+### 20130501 ###
 * Updated for Cordova 2.6.0 (backwards compatible to earlier versions as well)
 * Started plans to adapt this plugin for use with Android, Windows Phone, and Blackberry. Other platforms to follow.
+* Added an implementation that will allow for multiple buttons with multiple different payment information.
 * Community contribution is welcome. Send a pull request to contribute.
 
 ### 20120409 ###
