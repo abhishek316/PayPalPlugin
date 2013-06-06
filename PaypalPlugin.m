@@ -1,179 +1,73 @@
 //
-//  PaypalPlugin.m
-//  Paypal Plugin for PhoneGap
+//  PayPalPlugin.m
+//  paypalplugin
 //
-//  Originally by shazron on 10-10-08.
-//  Updated by Scott Robinson
-//  Copyright 2010-2012 Shazron Abdullah and 2013 Scott Robinson. All rights reserved.
+//  Created by Scott Robinson on 6/5/13.
+//
+//
 
-#import "PaypalPlugin.h"
-#import "PayPal.h"
-#import "PayPalMEPPayment.h"
-#import "MEPAddress.h" // use for dynamic amount calculation
-#import "MEPAmounts.h" // use for dynamic amount calculation
+#import "PayPalPlugin.h"
 
-@implementation PaypalPaymentInfo
+@implementation PayPalPlugin
 
-@synthesize paymentCurrency, paymentAmount, itemDesc, recipient, merchantName;
-
-- (void) dealloc
-{
-	self.paymentCurrency = nil;
-	self.paymentAmount = nil;
-	self.itemDesc = nil;
-	self.recipient = nil;
-	self.merchantName = nil;
-	
-	[super dealloc];
-}
-
-@end
-
-@implementation PaypalPlugin
-
-@synthesize paypalButton, paymentInfo;
-
-#define NO_APP_ID	@"dummy"
-
-/* Get one from Paypal at developer.paypal.com */
-#define PAYPAL_APP_ID	NO_APP_ID
-
-/* valid values are ENV_SANDBOX, ENV_NONE (offline) and ENV_LIVE */
-#define PAYPAL_APP_ENV	ENV_NONE
-
-
--(CDVPlugin*) initWithWebView:(UIWebView*)theWebView
-{
-    self = (PaypalPlugin*)[super initWithWebView:(UIWebView*)theWebView];
-    if (self) {
-		if ([PAYPAL_APP_ID isEqualToString:NO_APP_ID]) {
-			NSLog(@"WARNING: You are using a dummy PayPal App ID.");
-		}
-		if (PAYPAL_APP_ENV == ENV_NONE) {
-			NSLog(@"WARNING: You are using the offline PayPal ENV_NONE environment.");
-		}
-		
-		[PayPal initializeWithAppID:PAYPAL_APP_ID forEnvironment:PAYPAL_APP_ENV];
+- (IBAction)pay {
+    
+    //Create a PayPalPayment
+    PayPalPayment *p = [[PayPalPayment alloc] init];
+    p.amount = [[NSDecimalNumber alloc] initWithString:@"39.95"];
+    p.currencyCode = @"USD";
+    p.shortDescription = @"Awesome saws";
+    
+    //Check wether payment is processable
+    if (!p.processable) {
+        //TODO: Need to handle this
     }
-    return self;
+    
+    // Start out working with the test environment! When you are ready, remove this line
+    [PayPalPaymentViewController setEnvironment:PayPalEnvironmentNoNetwork];
+    
+    //Prove a payerID that uniquely identifies a user within the scope of your system,
+    // such as an email address or user ID
+    NSString *aPayerID = @"someuser@somedomain.com";
+    
+    // Create a PayPalPaymentViewController with the credentuals and payerID, the PayPalPayment
+    // from the previous step, and a PayPalPaymentDelegate to handle the results.
+    PayPalPaymentViewController *paymentViewController;
+    paymentViewController = [[PayPalPaymentViewController alloc] initWithClientId:@"YOUR_CLIENT_ID" recieverEmail:@"YOUR_PAYPAL_EMAIL_ADDRESS" payerId:aPayerID payment:p delegate:self];
+    
+    //Present the PayPalPaymentViewController
+    [self presentViewController:paymentViewController animated:YES completion:nil];
 }
-
-- (void) prepare:(NSMutableArray*)arguments withDict:(NSMutableDictionary*)options
-{
-	if (self.paypalButton != nil) {
-		[self.paypalButton removeFromSuperview];
-		self.paypalButton = nil;
-	}
-	
-	int argc = [arguments count];
-	if (argc < 1) {
-		NSLog(@"PaypalPlugin.prepare - missing first argument for paymentType (integer).");
-		return;
-	}
-	
-	NSString* strValue = [arguments objectAtIndex:0];
-	NSInteger paymentType = [strValue intValue];
-
-	self.paypalButton = [[PayPal getInstance] getPayButton:(UIViewController*)self /* requiring it to be a UIViewController is dumb paypal, it should be 'id' - especially since it's just for delegate callbacks */ 
-												buttonType:0
-											 startCheckOut:@selector(payWithPaypal) 
-											   PaymentType:paymentType
-												  withLeft:0 
-												   withTop:0];
-	
-	[super.webView addSubview:self.paypalButton];
-	self.paypalButton.hidden = YES;
-
-	NSLog(@"PaypalPlugin.prepare - set paymentType: %d", paymentType);
+    #pragma mark - PayPalPaymentDelegate methods
+    
+- (void)payPalPaymentDidComplete:(PayPalPayment *)completedPayment {
+    //Payment was processed successfully; send to server for verification and fulfillment.
+    [self veryifyCompletedPayment:completedPayment];
+    
+    //Dissmiss the PayPalPaymentViewController.
+    [self dismissViewControllerAnimated:YES completiton:nil];
 }
-
-
-- (void) pay:(NSMutableArray*)arguments withDict:(NSMutableDictionary*)options
-{
-	if (self.paypalButton != nil) {
-		[self.paypalButton sendActionsForControlEvents:UIControlEventTouchUpInside];
-	} else {
-		NSLog(@"PaypalPlugin.pay - payment not initialized. Call PaypalPlugin.prepare(paymentType)");
-	}
+    
+- (void)payPalPaymentDidCancel {
+    //The payment was canceled; dismiss the PauPalPaymentViewController.
+    [self dismissViewControllerAnimated:YES completion:nil];
 }
-
-- (void) setPaymentInfo:(NSMutableArray*)arguments withDict:(NSMutableDictionary*)options
-{
-	self.paymentInfo = nil;
-	self.paymentInfo = [[PaypalPaymentInfo alloc] init];
-	
-	[self.paymentInfo setValuesForKeysWithDictionary:options];
+    
+- (void)veryifyCompletedPayment:(PayPalPayment *)completedPayment {
+    //Send the enrite confirmation dictionary
+    NSData *confirmation = [NSJSONSerialization dataWithJSONObject:completedPayment.confirmation options:0 error:nil];
+        
+    // Send confirmation to your server; your server should verify the proof of payment
+    // and give the user their goods or services. If the server is not reachable, save
+    // the confirmation and try again later.
 }
-
-- (void) payWithPaypal
-{
-	if (self.paymentInfo)
-	{
-		PayPal *pp = [PayPal getInstance];
-		PayPalMEPPayment *payment =[[PayPalMEPPayment alloc] init];
-
-		payment.paymentCurrency = self.paymentInfo.paymentCurrency;
-		payment.paymentAmount	= self.paymentInfo.paymentAmount;
-		payment.itemDesc		= self.paymentInfo.itemDesc;
-		payment.recipient		= self.paymentInfo.recipient;
-		payment.merchantName	= self.paymentInfo.merchantName;
-
-		[pp Checkout:payment];
-		[payment release];
-
-		NSLog(@"PaypalPlugin.payWithPaypal - payment sent. currency:%@ amount:%@ desc:%@ recipient:%@ merchantName:%@",
-			  self.paymentInfo.paymentCurrency, self.paymentInfo.paymentAmount, self.paymentInfo.itemDesc,
-			  self.paymentInfo.recipient, self.paymentInfo.merchantName);
-	}
-	else
-	{
-		NSLog(@"PaypalPlugin.payWithPaypal - no payment info. Set it using PaypalPlugin.setPaymentInfo");
-	}
-}
-
-#pragma mark -
-#pragma mark Paypal delegates
-
-- (void) paymentSuccess:(NSString*)transactionID 
-{
-	NSString* jsString = 
-	@"(function() {"
-	"var e = document.createEvent('Events');"
-	"e.initEvent('PaypalPaymentEvent.Success');"
-	"e.transactionID = '%@';"
-	"document.dispatchEvent(e);"
-	"})();";
-	
-	[super writeJavascript:[NSString stringWithFormat:jsString, transactionID]];
-	
-	NSLog(@"PaypalPlugin.paymentSuccess - transactionId:%@", transactionID);
-}
-
-- (void) paymentCanceled 
-{
-	NSString* jsString = 
-	@"(function() {"
-	"var e = document.createEvent('Events');"
-	"e.initEvent('PaypalPaymentEvent.Canceled');"
-	"document.dispatchEvent(e);"
-	"})();";
-	
-	[super writeJavascript:jsString];	
-}
-
-- (void) paymentFailed:(PAYPAL_FAILURE)errorType
-{
-	NSString* jsString = 
-	@"(function() {"
-	"var e = document.createEvent('Events');"
-	"e.initEvent('PaypalPaymentEvent.Failed');"
-	"e.errorType = %d;"
-	"document.dispatchEvent(e);"
-	"})();";
-	
-	[super writeJavascript:[NSString stringWithFormat:jsString, errorType]];	
-
-	NSLog(@"PaypalPlugin.paymentFailed - errorType:%d", errorType);
+       
+- (void)viewWillAppear:(BOOL)animated {
+    [super viewWillAppear:animated];
+            
+    //Start out working with the test envirnment! When you are ready remove this line.
+    [PayPalPaymentViewController setEnvironment:PayPalEnvironmentNoNetwork];
+    [PayPalPaymentViewController prepareForPaymentUsingClientId:@"YOUR_CLIENT_ID"];
 }
 
 @end
