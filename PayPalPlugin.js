@@ -49,4 +49,3 @@ setRequired: function (success, fail, environment, clientId, clientEMail, amount
         //This is a 'listener'. Place your code here that you want to be called when a payment is canceled by the user.
         alert("Cancel");
     }
-};
