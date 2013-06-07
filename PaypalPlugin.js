@@ -8,36 +8,45 @@
  *
  *
  ****************************************/
-enum PayPalEnvironments { Production, Environment, NoNetwork }
+var cordovaRef = window.PhoneGap || window.Cordova || window.cordova;
 
 var PayPalPlugin = {
-    //User Actions and Methods
-    setEnvironment: function (environment : PayPalEnvironments) {
+    //*** Setup ***//
     
+    //Required
+setRequired: function (success, fail, environment, clientId, clientEMail, amount, currencyCode, shortDescription) {
+    cordovaRef.exec(function () {}, function () {}, "PayPalPlugin", "setRequired", [environment, clientId, clientEMail, amount, currencyCode, shortDescription]);
     },
-    initPayPal: function (clientID, receiverEmail, payerID,) {
-        
+    //Optional
+    setOptionalDefaults: function (success, fail, payerEmail, payerPhoneCountryCode, payerPhone) {
+        cordovaRef.exec(success, fail, "PayPalPlugin", "setOptionalDefaults", [payerEmail, payerPhoneCountryCode, payerPhone]);
     },
-    pay: function () {
-    
+    //Optional
+    setOptionalPayerID: function (success, fail, payerId) {
+        cordovaRef.exec(success, fail, "PayPalPlugin", "setOptionalPayerID", [payerId]);
     },
-    
-    //Methods called back from iOS (These work like listeners)
-    payPayPaymentDidComplete: function () {
-        //Insert your code here that you want to execute when a payment is successful
-        
+    //Optional
+    prepareForPayment: function (success, fail) {
+        cordovaRef.exec(success, fail, "PayPalPlugin", "prepareForPayment", []);
     },
-    payPalPaymentDidCancel: function () {
-        //Insert your code here that you want to execute when a payment is canceled by the user
-        
+    //Optional
+    preconnectToServer: function (success, fail) {
+        cordovaRef.exec(success, fail, "PayPalPlugin", "preconnectToServer", []);
     },
-    verifyCompletedPayment: function () {
-        // Include your code here to call to your server to verify the payment (Optional Security Measure)
-        
+    //*** Payment Processing ***//
+    //Required
+    pay: function (success, fail)
+    {
+        cordovaRef.exec(success, fail, "PayPalPlugin", "pay", []);
     },
-    payPalViewWillAppear: function () {
-        // Include your code here to execute when the paypal interface is going to appear
-        
+    //Required
+    PaymentComplete: function(object) {
+        //This is a 'listener'. Place your code here that you want to be called when a payment comes back successful.
+        alert("Success");
+    },
+    //Required
+    PaymentCanceled: function () {
+        //This is a 'listener'. Place your code here that you want to be called when a payment is canceled by the user.
+        alert("Cancel");
     }
-    
 };

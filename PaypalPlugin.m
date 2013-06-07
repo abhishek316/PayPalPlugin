@@ -10,64 +10,133 @@
 
 @implementation PayPalPlugin
 
-- (IBAction)pay {
+@synthesize payment,
+            viewController,
+            customerEMail,
+            customerPhoneCountryCode,
+            customerPhoneNumber,
+            payerID,
+            clientID;
+
+//*********//
+//**Setup**//
+//*********//
+
+//Required
+- (void)setRequired:(CDVInvokedUrlCommand *)command
+{
+    //Arguments
+    NSString * environment = [command.arguments objectAtIndex:0];
+    NSString * clientId = [command.arguments objectAtIndex:1];
+    NSString * clientEMail = [command.arguments objectAtIndex:2];
+    NSDecimalNumber * amount = [command.arguments objectAtIndex:3];
+    NSString * currencyCode = [command.arguments objectAtIndex:4];
+    NSString * shortDescription = [command.arguments objectAtIndex:5];
     
-    //Create a PayPalPayment
-    PayPalPayment *p = [[PayPalPayment alloc] init];
-    p.amount = [[NSDecimalNumber alloc] initWithString:@"39.95"];
-    p.currencyCode = @"USD";
-    p.shortDescription = @"Awesome saws";
+    //Create payment object
+    payment = [[[PayPalPayment alloc] init] autorelease];
     
-    //Check wether payment is processable
-    if (!p.processable) {
-        //TODO: Need to handle this
+    //Set payment information
+    payment.amount = amount;
+    payment.currencyCode = currencyCode;
+    payment.shortDescription = shortDescription;
+    
+    NSLog(@"Arguments: %@, %@, %@, %@, %@, %@", environment, clientId, clientEMail, amount, currencyCode, shortDescription);
+    
+    //Create PayPalViewController
+    viewController = [[[PayPalPaymentViewController alloc] initWithClientId:clientId
+                                                              receiverEmail:clientEMail
+                                                                    payerId:self.payerID
+                                                                    payment:self.payment
+                                                                   delegate:self] autorelease];
+    
+    //Set environment
+    if ([environment isEqual:@"NoNetwork"]) [PayPalPaymentViewController setEnvironment:PayPalEnvironmentNoNetwork];
+    else if ([environment isEqual:@"Sandbox"]) [PayPalPaymentViewController setEnvironment:PayPalEnvironmentSandbox];
+    else [PayPalPaymentViewController setEnvironment:PayPalEnvironmentProduction];
+    
+    //Keep needed variables
+    self.clientID = clientId;
+}
+
+//Optional
+- (void)setOptionalDefaults:(CDVInvokedUrlCommand *)command
+{
+    //Arguments
+    NSString * payerEmail = [command.arguments objectAtIndex:0];
+    NSString * payerPhoneCountryCode = [command.arguments objectAtIndex:1];
+    NSString * payerPhone = [command.arguments objectAtIndex:2];
+    
+    viewController.defaultUserEmail = payerEmail;
+    viewController.defaultUserPhoneCountryCode = payerPhoneCountryCode;
+    viewController.defaultUserPhoneNumber = payerPhone;
+}
+
+//Optional
+- (void)setOptionalPayerID:(CDVInvokedUrlCommand *)command
+{
+    //Arguments
+    NSString * payerId = [command.arguments objectAtIndex:0];
+    
+    NSLog(@"Payer ID: %@", payerId);
+    
+    self.payerID = payerId;
+}
+
+//Optional
+- (void)prepareForPayment:(CDVInvokedUrlCommand *)command
+{
+    [PayPalPaymentViewController prepareForPaymentUsingClientId:self.clientID];
+}
+
+//Optional
+- (void)preconnectToServer:(CDVInvokedUrlCommand *)command
+{
+    [PayPalPaymentViewController prepareForPaymentUsingClientId:self.clientID];
+}
+
+//************************//
+//** Payment Processing **//
+//************************//
+
+//Required
+- (void)pay:(CDVInvokedUrlCommand *)command
+{
+    if(!payment.processable) {
+        NSLog(@"Payment is not processable");
+        [super writeJavascript:@"PayPalPlugin.NotProcessable();"];
+    } else {
+        [viewController presentViewController:viewController
+                                     animated:YES
+                                   completion:nil];
     }
-    
-    // Start out working with the test environment! When you are ready, remove this line
-    [PayPalPaymentViewController setEnvironment:PayPalEnvironmentNoNetwork];
-    
-    //Prove a payerID that uniquely identifies a user within the scope of your system,
-    // such as an email address or user ID
-    NSString *aPayerID = @"someuser@somedomain.com";
-    
-    // Create a PayPalPaymentViewController with the credentuals and payerID, the PayPalPayment
-    // from the previous step, and a PayPalPaymentDelegate to handle the results.
-    PayPalPaymentViewController *paymentViewController;
-    paymentViewController = [[PayPalPaymentViewController alloc] initWithClientId:@"YOUR_CLIENT_ID" recieverEmail:@"YOUR_PAYPAL_EMAIL_ADDRESS" payerId:aPayerID payment:p delegate:self];
-    
-    //Present the PayPalPaymentViewController
-    [self presentViewController:paymentViewController animated:YES completion:nil];
 }
-    #pragma mark - PayPalPaymentDelegate methods
-    
-- (void)payPalPaymentDidComplete:(PayPalPayment *)completedPayment {
-    //Payment was processed successfully; send to server for verification and fulfillment.
-    [self veryifyCompletedPayment:completedPayment];
-    
-    //Dissmiss the PayPalPaymentViewController.
-    [self dismissViewControllerAnimated:YES completiton:nil];
+
+//Required
+- (void)payPalPaymentDidComplete:(PayPalPayment *)completedPayment
+{
+    [viewController dismissViewControllerAnimated:YES
+                                       completion:nil];
+    NSError *error;
+    NSData *jsonData = [NSJSONSerialization dataWithJSONObject:completedPayment.confirmation
+                                                       options:NSJSONWritingPrettyPrinted
+                                                         error:&error];
+    if (!jsonData) {
+        NSLog(@"JSON Serialization Error %@", error);
+    } else {
+        NSString *jsonString = [[[NSString alloc] initWithData:jsonData
+                                                      encoding:NSUTF8StringEncoding] autorelease];
+        NSString *javascriptString = [[[NSString alloc] initWithFormat:@"PayPalPlugin.PaymentCompleted(%@);", jsonString] autorelease];
+        [super writeJavascript:javascriptString];
+    }
 }
-    
-- (void)payPalPaymentDidCancel {
-    //The payment was canceled; dismiss the PauPalPaymentViewController.
-    [self dismissViewControllerAnimated:YES completion:nil];
-}
-    
-- (void)veryifyCompletedPayment:(PayPalPayment *)completedPayment {
-    //Send the enrite confirmation dictionary
-    NSData *confirmation = [NSJSONSerialization dataWithJSONObject:completedPayment.confirmation options:0 error:nil];
-        
-    // Send confirmation to your server; your server should verify the proof of payment
-    // and give the user their goods or services. If the server is not reachable, save
-    // the confirmation and try again later.
-}
-       
-- (void)viewWillAppear:(BOOL)animated {
-    [super viewWillAppear:animated];
-            
-    //Start out working with the test envirnment! When you are ready remove this line.
-    [PayPalPaymentViewController setEnvironment:PayPalEnvironmentNoNetwork];
-    [PayPalPaymentViewController prepareForPaymentUsingClientId:@"YOUR_CLIENT_ID"];
+
+//Required
+- (void)payPalPaymentDidCancel
+{
+    [viewController dismissViewControllerAnimated:YES
+                                       completion:nil];
+    [super writeJavascript:@"PayPalPlugin.PaymentCanceled();"];
 }
 
 @end
