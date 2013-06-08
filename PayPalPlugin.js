@@ -32,4 +32,7 @@ var PayPalPlugin = {
         alert("Payment Canceled");
     }
 };
+<<<<<<< HEAD
 
+=======
+>>>>>>> 92df5374f0d5a31cb0876d3af9fd7d02e4186636
