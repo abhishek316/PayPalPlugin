@@ -1,10 +1,12 @@
-//
-//  PayPalPlugin.m
-//  paypalplugin
-//
-//  Created by Scott Robinson on 6/5/13.
-//
-//
+/*****************************************
+ *  PayPalPlugin.m
+ *
+ *  Created by Scott Robinson on 6/5/13.
+ *
+ *  Version: 2.0b
+ *****************************************
+ * Implementation Note: DO NOT MODIFY THIS FILE
+ *****************************************/
 
 #import "PayPalPlugin.h"
 
@@ -51,7 +53,7 @@
     payment.currencyCode = currencyCode;
     payment.shortDescription = shortDescription;
     
-    NSLog(@"setRequired Arguments: %@, %@, %@, %@", environment, amount, currencyCode, shortDescription);
+    NSLog(@"Settings: %@, %@, %@, %@, %@, %@, %@, %@", environment, amount, currencyCode, shortDescription, payerId, payerEmail, payerPhoneCountryCode, payerPhone);
     
     NSDictionary *dict = [NSDictionary dictionaryWithContentsOfFile:[[NSBundle mainBundle] pathForResource:@"Info" ofType:@".plist"]];
     
