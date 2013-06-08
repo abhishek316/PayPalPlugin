@@ -10,133 +10,106 @@
 
 @implementation PayPalPlugin
 
-@synthesize payment,
-            viewController,
-            customerEMail,
-            customerPhoneCountryCode,
-            customerPhoneNumber,
-            payerID,
-            clientID;
-
-//*********//
-//**Setup**//
-//*********//
-
-//Required
-- (void)setRequired:(CDVInvokedUrlCommand *)command
+- (void)preconnect:(CDVInvokedUrlCommand *)command
 {
-    //Arguments
     NSString * environment = [command.arguments objectAtIndex:0];
-    NSString * clientId = [command.arguments objectAtIndex:1];
-    NSString * clientEMail = [command.arguments objectAtIndex:2];
-    NSDecimalNumber * amount = [command.arguments objectAtIndex:3];
-    NSString * currencyCode = [command.arguments objectAtIndex:4];
-    NSString * shortDescription = [command.arguments objectAtIndex:5];
     
-    //Create payment object
-    payment = [[[PayPalPayment alloc] init] autorelease];
+    NSDictionary *dict = [NSDictionary dictionaryWithContentsOfFile:[[NSBundle mainBundle] pathForResource:@"Info" ofType:@".plist"]];
+    
+    NSString *ClientID = [dict objectForKey:@"ClientID"];
+    
+    if([environment isEqual:@"NoNetwork"])
+    {
+        NSLog(@"Using NoNetwork");
+        [PayPalPaymentViewController setEnvironment:PayPalEnvironmentNoNetwork];
+    }
+    else if([environment isEqual:@"Sandbox"])
+    {
+        NSLog(@"Using Sandbox");
+        [PayPalPaymentViewController setEnvironment:PayPalEnvironmentSandbox];
+    }
+    else [PayPalPaymentViewController setEnvironment:PayPalEnvironmentNoNetwork];
+    
+    [PayPalPaymentViewController prepareForPaymentUsingClientId:ClientID];
+}
+
+- (void)makePayment:(CDVInvokedUrlCommand *)command
+{
+    NSString * environment = [command.arguments objectAtIndex:0];
+    NSDecimalNumber * amount = [command.arguments objectAtIndex:1];
+    NSString * currencyCode = [command.arguments objectAtIndex:2];
+    NSString * shortDescription = [command.arguments objectAtIndex:3];
+    NSString * payerId = [command.arguments objectAtIndex:4];
+    NSString * payerEmail = [command.arguments objectAtIndex:5];
+    NSString * payerPhoneCountryCode = [command.arguments objectAtIndex:6];
+    NSString * payerPhone = [command.arguments objectAtIndex:7];
+    
+    PayPalPayment * payment = [[PayPalPayment alloc] init];
     
     //Set payment information
     payment.amount = amount;
     payment.currencyCode = currencyCode;
     payment.shortDescription = shortDescription;
     
-    NSLog(@"Arguments: %@, %@, %@, %@, %@, %@", environment, clientId, clientEMail, amount, currencyCode, shortDescription);
+    NSLog(@"setRequired Arguments: %@, %@, %@, %@", environment, amount, currencyCode, shortDescription);
+    
+    NSDictionary *dict = [NSDictionary dictionaryWithContentsOfFile:[[NSBundle mainBundle] pathForResource:@"Info" ofType:@".plist"]];
+    
+    NSString *ClientID = [dict objectForKey:@"ClientID"];
+    NSString *ClientEMail = [dict objectForKey:@"ClientEMail"];
+    
+    NSLog(@"Client Information: %@, %@", ClientID, ClientEMail);
     
     //Create PayPalViewController
-    viewController = [[[PayPalPaymentViewController alloc] initWithClientId:clientId
-                                                              receiverEmail:clientEMail
-                                                                    payerId:self.payerID
-                                                                    payment:self.payment
-                                                                   delegate:self] autorelease];
+    PayPalPaymentViewController * paymentViewController = [[PayPalPaymentViewController alloc] initWithClientId:ClientID
+                                                                                                  receiverEmail:ClientEMail
+                                                                                                        payerId:payerId
+                                                                                                        payment:payment
+                                                                                                       delegate:self];
     
     //Set environment
     if ([environment isEqual:@"NoNetwork"]) [PayPalPaymentViewController setEnvironment:PayPalEnvironmentNoNetwork];
     else if ([environment isEqual:@"Sandbox"]) [PayPalPaymentViewController setEnvironment:PayPalEnvironmentSandbox];
     else [PayPalPaymentViewController setEnvironment:PayPalEnvironmentProduction];
     
-    //Keep needed variables
-    self.clientID = clientId;
-}
-
-//Optional
-- (void)setOptionalDefaults:(CDVInvokedUrlCommand *)command
-{
-    //Arguments
-    NSString * payerEmail = [command.arguments objectAtIndex:0];
-    NSString * payerPhoneCountryCode = [command.arguments objectAtIndex:1];
-    NSString * payerPhone = [command.arguments objectAtIndex:2];
+    paymentViewController.defaultUserEmail = payerEmail;
+    paymentViewController.defaultUserPhoneCountryCode = payerPhoneCountryCode;
+    paymentViewController.defaultUserPhoneNumber = payerPhone;
     
-    viewController.defaultUserEmail = payerEmail;
-    viewController.defaultUserPhoneCountryCode = payerPhoneCountryCode;
-    viewController.defaultUserPhoneNumber = payerPhone;
-}
-
-//Optional
-- (void)setOptionalPayerID:(CDVInvokedUrlCommand *)command
-{
-    //Arguments
-    NSString * payerId = [command.arguments objectAtIndex:0];
-    
-    NSLog(@"Payer ID: %@", payerId);
-    
-    self.payerID = payerId;
-}
-
-//Optional
-- (void)prepareForPayment:(CDVInvokedUrlCommand *)command
-{
-    [PayPalPaymentViewController prepareForPaymentUsingClientId:self.clientID];
-}
-
-//Optional
-- (void)preconnectToServer:(CDVInvokedUrlCommand *)command
-{
-    [PayPalPaymentViewController prepareForPaymentUsingClientId:self.clientID];
-}
-
-//************************//
-//** Payment Processing **//
-//************************//
-
-//Required
-- (void)pay:(CDVInvokedUrlCommand *)command
-{
     if(!payment.processable) {
         NSLog(@"Payment is not processable");
         [super writeJavascript:@"PayPalPlugin.NotProcessable();"];
     } else {
-        [viewController presentViewController:viewController
-                                     animated:YES
-                                   completion:nil];
+        NSLog(@"Payment is processable. Showing viewController");
+        [self.viewController presentViewController:paymentViewController
+                                          animated:YES
+                                        completion:nil];
     }
 }
 
-//Required
-- (void)payPalPaymentDidComplete:(PayPalPayment *)completedPayment
+-(void)payPalPaymentDidComplete:(PayPalPayment *)completedPayment
 {
-    [viewController dismissViewControllerAnimated:YES
-                                       completion:nil];
     NSError *error;
-    NSData *jsonData = [NSJSONSerialization dataWithJSONObject:completedPayment.confirmation
-                                                       options:NSJSONWritingPrettyPrinted
-                                                         error:&error];
-    if (!jsonData) {
-        NSLog(@"JSON Serialization Error %@", error);
+    NSData *jsonData = [NSJSONSerialization dataWithJSONObject:completedPayment.confirmation options:NSJSONWritingPrettyPrinted error:&error];
+    NSString *javascriptString;
+    
+    if(!jsonData) {
+        NSLog(@"JSON Serialization Error: %@", error);
     } else {
-        NSString *jsonString = [[[NSString alloc] initWithData:jsonData
-                                                      encoding:NSUTF8StringEncoding] autorelease];
-        NSString *javascriptString = [[[NSString alloc] initWithFormat:@"PayPalPlugin.PaymentCompleted(%@);", jsonString] autorelease];
-        [super writeJavascript:javascriptString];
+        NSString * jsonString = [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
+        javascriptString = [[NSString  alloc] initWithFormat:@"PayPalPlugin.payPalPaymentDidComplete(%@);", jsonString];
     }
+    
+    [super writeJavascript:javascriptString];
+    
+    [self.viewController dismissViewControllerAnimated:YES completion:nil];
 }
 
-//Required
 - (void)payPalPaymentDidCancel
 {
-    [viewController dismissViewControllerAnimated:YES
-                                       completion:nil];
-    [super writeJavascript:@"PayPalPlugin.PaymentCanceled();"];
+    [self writeJavascript:@"PayPalPlugin.payPalPaymentDidCancel();"];
+    
+    [self.viewController dismissViewControllerAnimated:YES completion:nil];
 }
 
 @end

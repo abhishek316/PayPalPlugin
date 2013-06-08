@@ -25,12 +25,8 @@ var app = {
     },
     InitPage: function() {
         $('#page').append(
-                          $('<button/>').html("Set Payer ID").on('click', function () {PayPalPlugin.setOptionalPayerID(null, null, "1234");}),
-                          $('<button/>').html("Set Required").on('click', function () {PayPalPlugin.setRequired(null, null, "NoNetwork", "9823508", "snare_c@yahoo.com", 25.07, "USD", "This is a description");}),
-                          $('<button/>').html("Prepare For Payment").on('click', function () {PayPalPlugin.prepareForPayment(null,null);}),
-                          $('<button/>').html("Set Defaults").on('click', function () {PayPalPlugin.setOptionalDefaults(null, null, "snare_chops@yahoo.com", "+1", "9192158536");}),
-                          $('<button/>').html("Preconnect to Server").on('click', function () {PayPalPlugin.preconnectToServer(null, null);}),
-                          $('<button/>').html("Pay").on('click', function () {PayPalPlugin.pay(null, null);})
+                          $('<button/>').html("Preconnect").on('click', function () {PayPalPlugin.preconnectToPaymentServers(success, fail, "Sandbox");}),
+                          $('<button/>').html("Make Payment").on('click', function () {PayPalPlugin.makePayment(success, fail, "Sandbox", 25.07, "USD", "This is a description", "1234", "snare_chops-Buyer@yahoo.com", "1", "9192158536");})
                           );
     }
 };
