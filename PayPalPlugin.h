@@ -1,10 +1,10 @@
 //
 //  PayPalPlugin.h
-//  paypalplugin
+//  iOS Pay Pal Plugin
 //
 //  Created by Scott Robinson on 6/5/13.
 //
-//
+//  Note: DO NOT MODIFY THIS FILE
 
 #import <Foundation/Foundation.h>
 #import <Cordova/CDVPlugin.h>
