@@ -1,20 +1,22 @@
 /****************************************
  *
- * PayPalPlugin By Scott Robinson
+ * PayPalPlugin.js
+ * 
+ * Created By Scott Robinson on 6/5/2013.
  *
+ * Version: 2.0b
  ****************************************
- *
- *
- *
- *
+ * See the README.md for instructions on how to use this file
  ****************************************/
 var cordovaRef = window.PhoneGap || window.Cordova || window.cordova;
 
 function success () {
-    
+    //Generic callback provided if the Cordova call to the native Objective-C should be successful
+    //Note: Probably don't want to do anything here... but provided nevertheless
 }
 
 function fail () {
+    //Generic callback provided if the Cordova call to the native Objective-C should fail
     
 }
 
@@ -26,13 +28,11 @@ var PayPalPlugin = {
         cordovaRef.exec(success, fail, "PayPalPlugin", "makePayment", [environment, amount, currencyCode, shortDescription, payerId, payerEmail, payerPhoneCountryCode, payerPhone]);
     },
     payPalPaymentDidComplete: function (confirmation) {
-        alert("Payment Completed");
+        //Provide your successful payment implementation here!
+        
     },
     payPalPaymentDidCancel: function () {
-        alert("Payment Canceled");
+        //Provide your payment canceled implementation here!
+        
     }
 };
-<<<<<<< HEAD
-
-=======
->>>>>>> 92df5374f0d5a31cb0876d3af9fd7d02e4186636
