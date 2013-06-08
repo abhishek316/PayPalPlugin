@@ -1,95 +1,106 @@
 # PhoneGap PayPal-Plugin #
-Originally by: Shazron Abdullah  
-Updated by: Scott Robinson
 
-## Adding the Plugin to your project ##
+by: Scott Robinson<br>
+@SnareChops<br>
+snare_chops@yahoo.com
 
-###iOS Instructions###
-Using this plugin requires [Cordova](http://github.com/apache/incubator-cordova-ios) and the PayPal Mobile Payments Library. The PayPal Mobile Payments Library can be downloaded [here](https://www.x.com/community/ppx/xspaces/mobile/mep).
+###Need Support?###
+
+Create a new issue and leave a description of your promblem or request.
+
+## INSTALLATION INSTRUCTIONS ##
+
+### iOS Installation ###
+Using this plugin requires [Cordova](http://github.com/apache/incubator-cordova-ios) and the PayPal-iOS-SDK (included in this Repo).
 
 1. Make sure your Cordova Xcode project has been [updated for Cordova 2.6.0](https://github.com/apache/incubator-cordova-ios/blob/master/guides/Cordova%20Plugin%20Upgrade%20Guide.md)
-2. Add the "Paypal Mobile Payments" folder to your project (put in a suitable location under your project, then drag and drop it in)
+2. Add the "PayPalMobile" folder to your project (put in a suitable location under your project, then drag and drop it in)
 3. Add the .h and .m files to your Plugins folder in your project (as a Group "yellow folder" not a Reference "blue folder")
 4. Add the .js files to your "www" folder on disk, and add reference(s) to the .js files as &lt;script&gt; tags in your html file(s)
-5. In **Cordova.plist** (1.5.0 or greater) or **PhoneGap.plist** (1.4.1 or lesser), under the **Plugins** section, add an idential key and value of **"PaypalPlugin"**
+5. In **config.xml** under the **Plugins** section, add an idential key and value of **"PayPalPlugin"**
 6. Make sure you check the **"RELEASE NOTES"** section below!
 
-##Detailed Instructions##
-This plugin can be used in two ways:
+## USAGE INSTRUCTIONS ##
 
-###&quot;Manual Mode&quot;:###
+### Version 2.0b (beta release) ###
+* **Note** - This is a COMPLETE re-write from the previous PayPalPlugin for iOS. If you were using the previous versions please remove all files, libraries and configuration settings and follow the instructions below.
 
-   There are 3 functions that need to be called for a payment to be processed:
+I have tried to make this plugin as simple and as hands-off as I could so that users can spend more time developing their application and less time trying to get the dumb plugin's to work *(I've been there too)*. So with that said if you have ANY issues or need help please create an issue above and your feedback will help make this beta release a solid and working, simple to use, plugin!
 
-      1. window.plugins.paypal.prepare(paymentType);
-         - This method takes an enum as an argument, the available options are:
-            *PayPal.PaymentType.HARD_GOODS
-            *PayPal.PaymentType.SERVICE
-            *PayPal.PaymentType.PERSONAL
-            *PayPal.PaymentType.DONATION
+#### Step-by-step instructions: ####
 
-      2. window.plugins.paypal.setPaymentInfo(paymentProperties);
-         - This method takes an object containing the following:
-            *paymentCurrency - a string value (required)
-            *paymentAmount - a double value (required)
-            *itemDesc - a string value (required)
-            *recipient - a string value of an email address (required)
-            *merchantName - a string value (required)
+1. Follow the installation instructions above for your particular device
+2. *(Optional)* In your javascript where you display the button or option for the user to make a payment with paypal call the following function: 
+    
+    `PayPalPlugin.preconnectToPaymentServers(<success>, <fail>, <environment>);`
+    
+    a. `<success>` - *function* - A javascript callback you would like called if Cordova successfully called the native Objective-C code *(Recommend you pass in `success` for the included generic success callback)*
+    
+    b. `<fail>` - *function* - A javascript callback you would like called if Cordova fails to call the native Objective-C code *(Recommend you pass in `fail` for the included generic fail callback)*
+    
+    c. `<environment>` - *string* - The environment you would like the plugin to run in. Options are: `"NoNetwork"`, `"Sandbox"`, and `"Production"`
 
-      3. window.plugins.paypal.pay();
+3. In your javascript where you would like the PayPal interface to display *(Recommend a 'Checkout' or 'Pay Now' button)* call the following function:
 
-   Example implementation:
-      
-      window.plugins.paypal.prepare(PayPal.PaymentType.HARD_GOODS);
-      window.plugins.paypal.setPaymentInfo({paymentCurrency: "USD",
-                                            paymentAmount: "10.00",
-                                            itemDesc: "iPhone 4S Case",
-                                            recipient: "support@somemakebelievecompany.com",
-                                            merchantName: "Make Believe Merchant"});
-      window.plugins.paypal.pay();
+    `PayPalPlugin.makePayment(<success>, <fail>, <environment>, <amount>, <currencyCode>, <shortDescription>,`
+    `                                       <payerId>, <payerEmail>, <payerPhoneCountryCode>, <payerPhone>);`
+    
+    a. `<success>` - *function* - A javascript callback you would like called if Cordova successfully called the native Objective-C code *(Recommend you pass in `success` for the included generic success callback)*
 
-###&quot;Auto Mode&quot;:###
+    b. `<fail>` - *function* - A javascript callback you would like called if Cordova fails to call the native Objective-C code *(Recommend you pass in `fail` for the included generic fail callback)*
 
-   Add the following code block to your javascript file: (an example is included, 'index.js')
+    c. `<environment>` - *string* - The environment you would like the plugin to run in. Options are: `"NoNetwork"`, `"Sandbox"`, and `"Production"`
+    
+    d. `<amount>` - *float* - The payment amount to be charged. *(If this is not a valid amount the plugin will call the callback function `PayPalPlugin.NotProcessable()`. See below for details)*
 
-      function PayPalButtonClick(event) {
-          switch (event.target.getAttribute("data-paymentType")) {
-              case "Hard Goods":
-                  window.plugins.paypal.prepare(PayPal.PaymentType.HARD_GOODS);
-                  break;
-              case "Service":
-                  window.plugins.paypal.prepare(PayPal.PaymentType.SERVICE);
-                  break;
-              case "Personal":
-                  window.plugins.paypal.prepare(PayPal.PaymentType.PERSONAL);
-                  break;
-              case "Donation":
-                  window.plugins.paypal.prepare(PayPal.PaymentType.DONATION);
-                  break;
-          }
-          window.plugins.paypal.setPaymentInfo({paymentCurrency: event.target.getAttribute("data-currency"), paymentAmount: event.target.getAttribute("data-amount"), itemDesc: event.target.getAttribute("data-description"), recipient: event.target.getAttribute("data-recipient"), merchantName: event.target.getAttribute("data-merchant")});
-          window.plugins.paypal.pay();
-      }
+    e. `<currencyCode>` - *string* - The currency that the amount is in. Example `"USD"` *Note: - The PayPal Library used in this version currently only supports US Payments.*
 
-   This will allow you to have multiple buttons on your html pages that all have the ability to send different type of payments and item details. To use this simply add an element to your html page with a onclick event of 'PayPalButtonClick(event)'
+    f. `<shortDescription>` - *string* - A description that will be displayed to the user on the payment screen.
 
-   Next add the following attributes to that element:
+    g. `<payerId>` - *string* or `null` - An id of any kind that you give the user. This allows the PayPal library to save the card information for easier future payments. *(Recommed an email or some other identifier you assign them, CAN be null)*
 
-      * data-paymentType - The type of payment to be sent (Options are: "Hard Goods", "Service", "Personal", or "Donation")
-      * data-currency - The currency for the payment (example: "USD")
-      * data-amount - The amount of the payment using the above currency (example: "10.00")
-      * data-description - A description of the item, service, personal payment, or donation.
-      * data-recipient - The email of the payment recipient
-      * data-merchant - The name of the merchant being paid
+    h. `<payerEmail>` - *string* or `null` - The user's email.
 
-   What this does is once the button is clicked, the above code block will call all of the &quot;Manual Mode&quot; functions for you setting their values to the values you set in the element's attributes.
+    i. `<payerPhoneCountryCode>` - *string* or `null` - The customer's phone country code. *Example: `"1"` for US and Canada*
 
-   Example implementation: 
+    j. `<payerPhone>` - *string* or `null` - The customer's phone number.
 
-      <button data-currency="USD" data-amount="10.00" data-description="Network Cable" data-recipient="name@example.com" data-merchant="Cables-R-Us" data-paymentType="Donation" onclick="PayPalButtonClick(event)">PAY</button>
-      <button data-currency="USD" data-amount="10.00" data-description="IDE" data-recipient="name@example.com" data-merchant="JAVA" data-paymentType="Service" onclick="PayPalButtonClick(event)">PAY</button>
+4. In your app's *.plist* file add the following two entries *(This file will be called __YourAppName__-Info.plist)*
+    
+    a. `ClientID` - *String* - *(Paste your client ID from http://sandbox.paypal.com for Sandbox testing or your Client ID from http://paypal.com for Production)*
+
+    b. `ClientEMail` - *String* - *(Enter your email address for your mock businness from http://sandbox.paypal.com for Sandbox testing or your email address for you actuall account for Production)*
+    
+5. In `PayPalPlugin.js` you will find the following functions. Add any implementation to them that you see fit.
+
+    a. `function success()` - The incuded success callback for the Cordova call to the native Objective-C code.
+    
+    b. `function fail()` - The included fail callback for the Cordova call to the native Objective-C code.
+    
+    c. `payPalPaymentDidComplete` - This gets called when the payment with the PayPal interface is complete. The JSON object `confirmation` that is returned should be sent to your server and sent to PayPal for payment validation
+    
+    d. `payPalPaymentDidCancel` - This gets called when the payment with the PayPal interface is cancelled.
+    
+    e. `NotProcessable` - This gets called when the payment amount that is sent with the `PayPalPlugin.makePayment()` method is unable to be processed.
+
+6. You're done. Test and enjoy.
 
 ## RELEASE NOTES ##
+
+### 20130608 ###
+* Complete re-write of the plugin to use the new PayPal-iOS-SDK *(PayPal has deprecated the MPL library that this plugin used to use.)*
+* Note from PayPal: *PayPal is replacing the Mobile Payments Libraries (MPL) with the PayPal iOS SDK. The PayPal iOS SDK is currently available in the US, with more country support coming soon. US developers should upgrade now for more features and a better mobile experience.*
+* Existing users wishing to update to this version will need to remove all of the old PayPalPlugin files including the `PayPal_MobilePayments_Library` from their existing projects and replace it with the new files in this release.
+* Due to the new Library and architecture the method names, functions, variables, enumerators, and any other old implementation code that you may have had will need to be replaced with the new functions.
+
+## FUTURE RELEASE PLANS ##
+* According to the PayPal-iOS-SDK documentation all payments should be verified by sending a call from your app to your server, then to the PayPal server for verification of a valid and genuine payment. I will be adding in the future a companion web application that will perform this validation. *(Will be in a serarate GitHub Repository and a link will be placed in this README)*
+* Android support
+
+
+## LEGACY RELEASE NOTES ##
+
+These no longer apply as the plugin has undergone a COMPLETE re-write
 
 ### 20130501 ###
 * Updated for Cordova 2.6.0 (backwards compatible to earlier versions as well)
@@ -122,7 +133,7 @@ Post issues using the issue tab above. Thank you for your support.
 
 ## LICENSE ##
 
-Copyright 2010-2012 Shazron Abdullah and 2013 Scott Robinson
+Copyright 2013 Scott Robinson
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
