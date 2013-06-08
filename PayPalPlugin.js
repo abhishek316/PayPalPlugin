@@ -34,5 +34,9 @@ var PayPalPlugin = {
     payPalPaymentDidCancel: function () {
         //Provide your payment canceled implementation here!
         
+    },
+    NotProcessable: function () {
+        //Provide your payment is not processable implementation here!
+        
     }
 };
