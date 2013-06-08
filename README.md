@@ -42,7 +42,8 @@ I have tried to make this plugin as simple and as hands-off as I could so that u
 
 3. In your javascript where you would like the PayPal interface to display *(Recommend a 'Checkout' or 'Pay Now' button)* call the following function:
 
-    `PayPalPlugin.makePayment(<success>, <fail>, <environment>, <amount>, <currencyCode>, <shortDescription>, <payerId>, <payerEmail>, <payerPhoneCountryCode>, <payerPhone>);`
+    `PayPalPlugin.makePayment(<success>, <fail>, <environment>, <amount>, <currencyCode>, <shortDescription>,`
+    `                                       <payerId>, <payerEmail>, <payerPhoneCountryCode>, <payerPhone>);`
     
     a. `<success>` - *function* - A javascript callback you would like called if Cordova successfully called the native Objective-C code *(Recommend you pass in `success` for the included generic success callback)*
 
@@ -66,9 +67,9 @@ I have tried to make this plugin as simple and as hands-off as I could so that u
 
 4. In your app's *.plist* file add the following two entries *(This file will be called __YourAppName__-Info.plist)*
     
-    a. `ClientID` - *String* - **(Paste your client ID from http://sandbox.paypal.com for Sandbox testing or your Client ID from http://paypal.com for Production)**
+    a. `ClientID` - *String* - *(Paste your client ID from http://sandbox.paypal.com for Sandbox testing or your Client ID from http://paypal.com for Production)*
 
-    b. `ClientEMail` - *String* - **(Enter your email address for your mock businness from http://sandbox.paypal.com for Sandbox testing or your email address for you actuall account for Production)**
+    b. `ClientEMail` - *String* - *(Enter your email address for your mock businness from http://sandbox.paypal.com for Sandbox testing or your email address for you actuall account for Production)*
     
 5. In `PayPalPlugin.js` you will find the following functions. Add any implementation to them that you see fit.
 
