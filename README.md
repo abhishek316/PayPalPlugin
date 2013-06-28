@@ -83,7 +83,26 @@ I have tried to make this plugin as simple and as hands-off as I could so that u
     
     e. `NotProcessable` - This gets called when the payment amount that is sent with the `PayPalPlugin.makePayment()` method is unable to be processed.
 
-6. You're done. Test and enjoy.
+6. In your project's **Build Settings** add `-lstdc++` and `-ObjC` to **Other Linker Flags**
+
+7. In your project's **Build Phases**, link your project with these libraries. Weak linking for iOS versions back to 5.0 is supported.
+
+    
+        AVFoundation.framework
+        AudioToolbox.framework
+        CoreMedia.framework
+        CoreVideo.framework
+        libxml2.dylib
+        MessageUI.framework
+        MobileCoreServices.framework
+        OpenGLES.framework
+        QuartzCore.framework
+        Security.framework
+        UIKit.framework
+    
+    *Some of these may already be referenced, but some will not. Just be sure to include them all...*
+
+8. You're done. Test and enjoy.
 
 ## RELEASE NOTES ##
 
