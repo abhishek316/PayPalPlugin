@@ -30,7 +30,7 @@
         NSLog(@"Using Sandbox");
         [PayPalPaymentViewController setEnvironment:PayPalEnvironmentSandbox];
     }
-    else [PayPalPaymentViewController setEnvironment:PayPalEnvironmentNoNetwork];
+    else [PayPalPaymentViewController setEnvironment:PayPalEnvironmentProduction];
     
     [PayPalPaymentViewController prepareForPaymentUsingClientId:ClientID];
 }
